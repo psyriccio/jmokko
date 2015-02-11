@@ -47,8 +47,8 @@ public class AnnotationTableModel extends AbstractTableModel {
         this.valuesReplacements = new ConcurrentHashMap<>();
         this.valuesReplacementsReverse = new ConcurrentHashMap<>();
         log.debug("Searching @TableColumn and @Order");
-        Class tableColumnAnnotationClass = clazz.getClassLoader().loadClass("mokko.swing.tables.TableColumn");
-        Class orderAnnotation = clazz.getClassLoader().loadClass("mokko.swing.tables.Order");
+        Class tableColumnAnnotationClass = clazz.getClassLoader().loadClass("jmokko.swing.tables.TableColumn");
+        Class orderAnnotation = clazz.getClassLoader().loadClass("jmokko.swing.tables.Order");
         Set<Field> fieldsSet = ReflectionUtils.getAllFields(clazz, ReflectionUtils.withAnnotation(tableColumnAnnotationClass));
         HashMap<Field, Integer> fields = new HashMap<>();
         for(Field fld : fieldsSet) {
@@ -83,7 +83,7 @@ public class AnnotationTableModel extends AbstractTableModel {
         urls.addAll(ClasspathHelper.forPackage(appPackage));
         cfgBuilder.addUrls(urls);
         Reflections reflections = new Reflections(cfgBuilder);
-        Class enumDescINAnnotationClass = clazz.getClassLoader().loadClass("mokko.swing.tables.EnumDescriptionInsteadName");
+        Class enumDescINAnnotationClass = clazz.getClassLoader().loadClass("jmokko.swing.tables.EnumDescriptionInsteadName");
         Set<Class<?>> types = reflections.getTypesAnnotatedWith(enumDescINAnnotationClass); //reflections.getTypesAnnotatedWith(mokko.swing.tables.EnumDescriptionInsteadName.class);
         for(Class cl : types) {
             log.debug("   " + cl.getName() + ", superClass: " + cl.getSuperclass().getName());
@@ -105,7 +105,7 @@ public class AnnotationTableModel extends AbstractTableModel {
                 Field[] fieldsArr = cl.getFields();
                 for(Field fld : fieldsArr) {
                     log.debug("Get @Description for field " + fld.getName());
-                    Class descriptionAnnotationClass = clazz.getClassLoader().loadClass("mokko.swing.tables.Description");
+                    Class descriptionAnnotationClass = clazz.getClassLoader().loadClass("jmokko.swing.tables.Description");
                     if(fld.isAnnotationPresent(descriptionAnnotationClass)) {
                         Class fieldClass = fld.getType();
                         Description descr = fld.getAnnotation(Description.class);
