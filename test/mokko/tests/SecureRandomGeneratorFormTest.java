@@ -6,7 +6,7 @@
 package mokko.tests;
 
 import java.security.KeyPair;
-import mokko.crypt.KeyGenerator;
+import jmokko.crypt.KeyGenerator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
