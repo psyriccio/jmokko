@@ -178,5 +178,9 @@ public class AnnotationTableModel extends AbstractTableModel {
     public boolean isCellEditable(int rowIndex, int columnIndex) {
         return fieldEditable.get(columnIndex);
     }
+
+    public List getItems() {
+        return items;
+    }
     
 }
