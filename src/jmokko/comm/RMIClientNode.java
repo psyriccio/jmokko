@@ -39,7 +39,7 @@ public class RMIClientNode extends Node {
                 RmiProxyFactoryBean rmiProxyFactory = new RmiProxyFactoryBean();
                 rmiProxyFactory.setLookupStubOnStartup(false);
                 rmiProxyFactory.setRefreshStubOnConnectFailure(true);
-                rmiProxyFactory.setServiceUrl("rmi://" + inetAddress.getHostName() + ":" + Integer.toString(port) + "jmokko.comm.ITransportPipe");
+                rmiProxyFactory.setServiceUrl("rmi://" + inetAddress.getHostName() + ":" + Integer.toString(port) + "/jmokko.comm.ITransportPipe");
                 rmiProxyFactory.setServiceInterface(jmokko.comm.ITransportPipe.class);
                 rmiProxyFactory.afterPropertiesSet();
                 log.info("RMI-factory created");
