@@ -30,7 +30,7 @@ public class Entity<T> {
 
     public static JAXBContext getJAXBContext() throws JAXBException {
         if(jaxbContext == null) {
-            jaxbContext = JAXB.buildContext("mokko.crypt");
+            jaxbContext = JAXB.buildContext("jmokko.crypt");
         }
         return jaxbContext;
     }

@@ -77,7 +77,7 @@ public class RMIServerNode extends Node {
         log.info("Starting RMIServerNode");
         if(rmiServiceExporter == null) {
             rmiServiceExporter = new RmiServiceExporter();
-            rmiServiceExporter.setServiceName("mokko.comm.ITransportPipe");
+            rmiServiceExporter.setServiceName("jmokko.comm.ITransportPipe");
             rmiServiceExporter.setService(pipe);
             rmiServiceExporter.setServiceInterface(ITransportPipe.class);
             rmiServiceExporter.setServicePort(getPort());

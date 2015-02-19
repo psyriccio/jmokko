@@ -79,12 +79,12 @@ public class AnnotationTableModel extends AbstractTableModel {
         });
         log.debug("Searching @EnumDescriptionInsteadName, using ClassLoader: " + clazz.getClassLoader().toString());
         ConfigurationBuilder cfgBuilder = new ConfigurationBuilder();
-        Set<URL> urls = ClasspathHelper.forPackage("mokko");
+        Set<URL> urls = ClasspathHelper.forPackage("jmokko");
         urls.addAll(ClasspathHelper.forPackage(appPackage));
         cfgBuilder.addUrls(urls);
         Reflections reflections = new Reflections(cfgBuilder);
         Class enumDescINAnnotationClass = clazz.getClassLoader().loadClass("jmokko.swing.tables.EnumDescriptionInsteadName");
-        Set<Class<?>> types = reflections.getTypesAnnotatedWith(enumDescINAnnotationClass); //reflections.getTypesAnnotatedWith(mokko.swing.tables.EnumDescriptionInsteadName.class);
+        Set<Class<?>> types = reflections.getTypesAnnotatedWith(enumDescINAnnotationClass); //reflections.getTypesAnnotatedWith(jmokko.swing.tables.EnumDescriptionInsteadName.class);
         for(Class cl : types) {
             log.debug("   " + cl.getName() + ", superClass: " + cl.getSuperclass().getName());
             if(cl.getSuperclass().equals(Enum.class)) {
