@@ -5,14 +5,23 @@
  */
 package jmokko.jaxb;
 
+import com.google.common.io.Resources;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
@@ -65,8 +74,25 @@ public class JAXB {
         if(!contextCache.containsKey("")) {
             ConfigurationBuilder confBuilder = new ConfigurationBuilder();
             confBuilder.addUrls(ClasspathHelper.forClassLoader());
-            Reflections reflections = new Reflections(confBuilder);
-            Set<Class<?>> types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
+            Set<Class<?>> types;
+            try {
+                URL url = Resources.getResource("_xml_class_cache.xml");
+                try (ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
+                    types = (Set<Class<?>>) objIn.readObject();
+                }
+            } catch (Exception ex) {
+                Reflections reflections = new Reflections(confBuilder);
+                types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
+                try {
+                    try (FileOutputStream fout = new FileOutputStream(new File("_xml_class_cache.xml")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
+                        objOut.writeObject(types);
+                    }
+                } catch (FileNotFoundException ex1) {
+                    //
+                } catch (IOException ex1) {
+                    //
+                }
+            }
             List<Class> jaxbClasses = new ArrayList<>();
             for(Class cl : types) {
                 if(cl.getSuperclass().equals(JAXBClassesCollection.class)) {
@@ -91,14 +117,32 @@ public class JAXB {
         for(String pack : packages) {
             cacheKey = cacheKey + pack + ";";
         }
+        String resCacheKey = cacheKey.replace(";", "_");
         if(!contextCache.containsKey(cacheKey)) {
             ConfigurationBuilder confBuilder = new ConfigurationBuilder();
             for(String pack : packages) {
                 confBuilder.addUrls(ClasspathHelper.forPackage(pack));
             }
             confBuilder.addUrls(ClasspathHelper.forClassLoader());
-            Reflections reflections = new Reflections(confBuilder);
-            Set<Class<?>> types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
+            Set<Class<?>> types;
+            try {
+                URL url = Resources.getResource("_xml_class_cache_" + resCacheKey + ".xml");
+                try (ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
+                    types = (Set<Class<?>>) objIn.readObject();
+                }
+            } catch (Exception ex) {
+                Reflections reflections = new Reflections(confBuilder);
+                types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
+                try {
+                    try (FileOutputStream fout = new FileOutputStream(new File("_xml_class_cache_" + resCacheKey + ".xml")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
+                        objOut.writeObject(types);
+                    }
+                } catch (FileNotFoundException ex1) {
+                    //
+                } catch (IOException ex1) {
+                    //
+                }
+            }
             List<Class> jaxbClasses = new ArrayList<>();
             for(Class cl : types) {
                 if(cl.getSuperclass().equals(JAXBClassesCollection.class)) {
