@@ -42,7 +42,7 @@ public class AnnotationTableModel extends AbstractTableModel {
         log.debug("Initializing AnnotationTableModel for class " + clazz.getName());
         this.items = items;
         try {
-            URL url = Resources.getResource("_atm_cache_" + appPackage + "_" + clazz.getCanonicalName() + ".cch");
+            URL url = Resources.getResource("_atm_cache_" + clazz.getCanonicalName() + ".cch");
             try (ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
                 cache = (AnnotationTableModelCacheItem) objIn.readObject();
                 return;
@@ -122,7 +122,7 @@ public class AnnotationTableModel extends AbstractTableModel {
             }
         }
         try {
-            try (FileOutputStream fout = new FileOutputStream(new File("_atm_cache_" + appPackage + "_" + clazz.getCanonicalName() + ".cch")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
+            try (FileOutputStream fout = new FileOutputStream(new File("_atm_cache_" + clazz.getCanonicalName() + ".cch")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
                 objOut.writeObject(cache);
             }
         } catch (FileNotFoundException ex1) {
