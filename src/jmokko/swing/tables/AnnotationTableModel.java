@@ -5,6 +5,13 @@
  */
 package jmokko.swing.tables;
 
+import com.google.common.io.Resources;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
@@ -29,23 +36,22 @@ public class AnnotationTableModel extends AbstractTableModel {
     
     private final Logger log = LogManager.getLogger(this.getClass().getName());
     private static final long serialVersionUID = 1L;
-    private final List<Field> fieldsObjects;
-    private final List<Class> fieldClasses;
-    private final List<String> fieldCaptions;
-    private final List<Boolean> fieldEditable;
-    private final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, String>> valuesReplacements;
-    private final ConcurrentHashMap<Class<?>, ConcurrentHashMap<String, String>> valuesReplacementsReverse;
+    private AnnotationTableModelCacheItem cache;
     private List items;
     
     public AnnotationTableModel(Class clazz, List items, String appPackage) throws ClassNotFoundException {
         log.debug("Initializing AnnotationTableModel for class " + clazz.getName());
-        this.fieldClasses = new ArrayList<>();
-        this.fieldCaptions = new ArrayList<>();
-        this.fieldsObjects = new ArrayList<>();
-        this.fieldEditable = new ArrayList<>();
         this.items = items;
-        this.valuesReplacements = new ConcurrentHashMap<>();
-        this.valuesReplacementsReverse = new ConcurrentHashMap<>();
+        try {
+            URL url = Resources.getResource("_atm_cache_" + appPackage + "_" + clazz.getCanonicalName() + ".cch");
+            try (ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
+                cache = (AnnotationTableModelCacheItem) objIn.readObject();
+                return;
+            }
+        } catch (Exception ex) {
+            //
+        }
+        cache = new AnnotationTableModelCacheItem();
         log.debug("Searching @TableColumn and @Order");
         Class tableColumnAnnotationClass = clazz.getClassLoader().loadClass("jmokko.swing.tables.TableColumn");
         Class orderAnnotation = clazz.getClassLoader().loadClass("jmokko.swing.tables.Order");
@@ -71,10 +77,10 @@ public class AnnotationTableModel extends AbstractTableModel {
                 if(fieldCaption.isEmpty()) {
                     fieldCaption = fld.getName();
                 }
-                fieldsObjects.add(fld);
-                fieldClasses.add(fieldClass);
-                fieldCaptions.add(fieldCaption);
-                fieldEditable.add(fEd);
+                cache.getFieldsObjects().add(fld);
+                cache.getFieldClasses().add(fieldClass);
+                cache.getFieldCaptions().add(fieldCaption);
+                cache.getFieldEditable().add(fEd);
             }
         });
         log.debug("Searching @EnumDescriptionInsteadName, using ClassLoader: " + clazz.getClassLoader().toString());
@@ -90,17 +96,17 @@ public class AnnotationTableModel extends AbstractTableModel {
             if(cl.getSuperclass().equals(Enum.class)) {
                 ConcurrentHashMap<String, String> repMap;
                 ConcurrentHashMap<String, String> repMapRev;
-                if(valuesReplacements.containsKey(cl)) {
-                    repMap = valuesReplacements.get(cl);
+                if(cache.getValuesReplacements().containsKey(cl)) {
+                    repMap = cache.getValuesReplacements().get(cl);
                 } else {
                     repMap = new ConcurrentHashMap<>();
-                    valuesReplacements.put(cl, repMap);
+                    cache.getValuesReplacements().put(cl, repMap);
                 }
-                if(valuesReplacementsReverse.containsKey(cl)) {
-                    repMapRev = valuesReplacementsReverse.get(cl);
+                if(cache.getValuesReplacementsReverse().containsKey(cl)) {
+                    repMapRev = cache.getValuesReplacementsReverse().get(cl);
                 } else {
                     repMapRev = new ConcurrentHashMap<>();
-                    valuesReplacementsReverse.put(cl, repMapRev);
+                    cache.getValuesReplacementsReverse().put(cl, repMapRev);
                 }
                 Field[] fieldsArr = cl.getFields();
                 for(Field fld : fieldsArr) {
@@ -116,6 +122,16 @@ public class AnnotationTableModel extends AbstractTableModel {
                 }
             }
         }
+        try {
+            try (FileOutputStream fout = new FileOutputStream(new File("_atm_cache_" + appPackage + "_" + clazz.getCanonicalName() + ".cch")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
+                objOut.writeObject(cache);
+            }
+        } catch (FileNotFoundException ex1) {
+            //
+        } catch (IOException ex1) {
+            //
+        }
+
     }
     
     public void updateModel(List items) {
@@ -130,16 +146,16 @@ public class AnnotationTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return fieldsObjects.size();
+        return cache.getFieldsObjects().size();
     }
 
     @Override
     public Object getValueAt(int rowIndex, int columnIndex) {
         Object res = null;
         try {
-            res = fieldsObjects.get(columnIndex).get(items.get(rowIndex));
-            if(valuesReplacements.containsKey(fieldClasses.get(columnIndex))) {
-                ConcurrentHashMap<String, String> repMap = valuesReplacements.get(fieldClasses.get(columnIndex));
+            res = cache.getFieldsObjects().get(columnIndex).get(items.get(rowIndex));
+            if(cache.getValuesReplacements().containsKey(cache.getFieldClasses().get(columnIndex))) {
+                ConcurrentHashMap<String, String> repMap = cache.getValuesReplacements().get(cache.getFieldClasses().get(columnIndex));
                 res = repMap.get(res.toString());
             }
         } catch (IllegalArgumentException | IllegalAccessException ex) {
@@ -152,13 +168,13 @@ public class AnnotationTableModel extends AbstractTableModel {
     public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
         try {
             Object newValue = aValue;
-            if(valuesReplacements.containsKey(fieldClasses.get(columnIndex))) {
-                ConcurrentHashMap<String, String> repMapRev = valuesReplacementsReverse.get(fieldClasses.get(columnIndex));
+            if(cache.getValuesReplacements().containsKey(cache.getFieldClasses().get(columnIndex))) {
+                ConcurrentHashMap<String, String> repMapRev = cache.getValuesReplacementsReverse().get(cache.getFieldClasses().get(columnIndex));
                 if(repMapRev.containsKey(aValue)) {
-                    newValue = Enum.valueOf((Class<Enum>) fieldClasses.get(columnIndex), (String) aValue);
+                    newValue = Enum.valueOf((Class<Enum>) cache.getFieldClasses().get(columnIndex), (String) aValue);
                 }
             }
-            fieldsObjects.get(columnIndex).set(items.get(rowIndex), newValue);
+            cache.getFieldsObjects().get(columnIndex).set(items.get(rowIndex), newValue);
         } catch (IllegalArgumentException | IllegalAccessException ex) {
             log.catching(ex);
         }
@@ -166,17 +182,17 @@ public class AnnotationTableModel extends AbstractTableModel {
 
     @Override
     public Class<?> getColumnClass(int columnIndex) {
-        return fieldClasses.get(columnIndex);
+        return cache.getFieldClasses().get(columnIndex);
     }
 
     @Override
     public String getColumnName(int column) {
-        return fieldCaptions.get(column);
+        return cache.getFieldCaptions().get(column);
     }
 
     @Override
     public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return fieldEditable.get(columnIndex);
+        return cache.getFieldEditable().get(columnIndex);
     }
 
     public List getItems() {
