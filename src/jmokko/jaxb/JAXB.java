@@ -72,8 +72,6 @@ public class JAXB {
     
     public static JAXBContext buildContext() throws JAXBException {
         if(!contextCache.containsKey("")) {
-            ConfigurationBuilder confBuilder = new ConfigurationBuilder();
-            confBuilder.addUrls(ClasspathHelper.forClassLoader());
             Set<Class<?>> types;
             try {
                 URL url = Resources.getResource("_xml_class_cache.xml");
@@ -81,6 +79,8 @@ public class JAXB {
                     types = (Set<Class<?>>) objIn.readObject();
                 }
             } catch (Exception ex) {
+                ConfigurationBuilder confBuilder = new ConfigurationBuilder();
+                confBuilder.addUrls(ClasspathHelper.forClassLoader());
                 Reflections reflections = new Reflections(confBuilder);
                 types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
                 try {
@@ -119,11 +119,6 @@ public class JAXB {
         }
         String resCacheKey = cacheKey.replace(";", "_");
         if(!contextCache.containsKey(cacheKey)) {
-            ConfigurationBuilder confBuilder = new ConfigurationBuilder();
-            for(String pack : packages) {
-                confBuilder.addUrls(ClasspathHelper.forPackage(pack));
-            }
-            confBuilder.addUrls(ClasspathHelper.forClassLoader());
             Set<Class<?>> types;
             try {
                 URL url = Resources.getResource("_xml_class_cache_" + resCacheKey + ".xml");
@@ -131,6 +126,11 @@ public class JAXB {
                     types = (Set<Class<?>>) objIn.readObject();
                 }
             } catch (Exception ex) {
+                ConfigurationBuilder confBuilder = new ConfigurationBuilder();
+                for(String pack : packages) {
+                    confBuilder.addUrls(ClasspathHelper.forPackage(pack));
+                }
+                confBuilder.addUrls(ClasspathHelper.forClassLoader());
                 Reflections reflections = new Reflections(confBuilder);
                 types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
                 try {
