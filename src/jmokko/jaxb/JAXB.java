@@ -121,7 +121,7 @@ public class JAXB {
         if(!contextCache.containsKey(cacheKey)) {
             Set<Class<?>> types;
             try {
-                URL url = Resources.getResource("_xml_class_cache_" + resCacheKey + ".xml");
+                URL url = Resources.getResource("_xml_class_cache_" + resCacheKey + ".cch");
                 try (ObjectInputStream objIn = new ObjectInputStream(url.openStream())) {
                     types = (Set<Class<?>>) objIn.readObject();
                 }
@@ -134,7 +134,7 @@ public class JAXB {
                 Reflections reflections = new Reflections(confBuilder);
                 types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
                 try {
-                    try (FileOutputStream fout = new FileOutputStream(new File("_xml_class_cache_" + resCacheKey + ".xml")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
+                    try (FileOutputStream fout = new FileOutputStream(new File("_xml_class_cache_" + resCacheKey + ".cch")); ObjectOutputStream objOut = new ObjectOutputStream(fout)) {
                         objOut.writeObject(types);
                     }
                 } catch (FileNotFoundException ex1) {
