@@ -48,7 +48,7 @@ public class AnnotationTableModel extends AbstractTableModel {
                 return;
             }
         } catch (Exception ex) {
-            //
+            log.catching(ex);
         }
         cache = new AnnotationTableModelCacheItem();
         log.debug("Searching @TableColumn and @Order");
@@ -128,7 +128,7 @@ public class AnnotationTableModel extends AbstractTableModel {
         } catch (FileNotFoundException ex1) {
             //
         } catch (IOException ex1) {
-            //
+            log.catching(ex1);
         }
 
     }
