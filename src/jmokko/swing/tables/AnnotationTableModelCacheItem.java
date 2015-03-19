@@ -5,6 +5,7 @@
  */
 package jmokko.swing.tables;
 
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author psyriccio
  */
-public class AnnotationTableModelCacheItem {
+public class AnnotationTableModelCacheItem implements Serializable {
 
     private final List<Field> fieldsObjects;
     private final List<Class> fieldClasses;
