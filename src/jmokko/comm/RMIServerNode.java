@@ -80,6 +80,7 @@ public class RMIServerNode extends Node {
             rmiServiceExporter.setServiceName("jmokko.comm.ITransportPipe");
             rmiServiceExporter.setService(pipe);
             rmiServiceExporter.setServiceInterface(ITransportPipe.class);
+            rmiServiceExporter.setRegistryHost(getInetAddress().getHostAddress());
             rmiServiceExporter.setServicePort(getPort());
             rmiServiceExporter.setRegistryPort(getPort());
             rmiServiceExporter.afterPropertiesSet();
