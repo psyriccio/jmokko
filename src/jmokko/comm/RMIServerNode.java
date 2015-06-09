@@ -11,7 +11,6 @@ import java.net.UnknownHostException;
 import java.rmi.RemoteException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
 import jmokko.utils.Utils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
