@@ -28,6 +28,7 @@ public class RMIServerNode extends Node {
     private final ConcurrentLinkedQueue<TransportMessage> inQueue;
     private final SessionManager sessionManager = new SessionManager(10000);
     private final IAuthenticationService authService;
+    private String registryHost = "";
     private final ITransportPipe pipe = new ITransportPipe() {
 
         @Override
@@ -80,7 +81,11 @@ public class RMIServerNode extends Node {
             rmiServiceExporter.setServiceName("jmokko.comm.ITransportPipe");
             rmiServiceExporter.setService(pipe);
             rmiServiceExporter.setServiceInterface(ITransportPipe.class);
-            rmiServiceExporter.setRegistryHost(getInetAddress().getHostAddress());
+            if(getRegistryHost().isEmpty()) {
+                rmiServiceExporter.setRegistryHost(getInetAddress().getHostAddress());
+            } else {
+                rmiServiceExporter.setRegistryHost(getRegistryHost());
+            }
             rmiServiceExporter.setServicePort(getPort());
             rmiServiceExporter.setRegistryPort(getPort());
             rmiServiceExporter.afterPropertiesSet();
@@ -103,6 +108,14 @@ public class RMIServerNode extends Node {
 
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<TransportMessage>> getQueues() {
         return queues;
+    }
+
+    public String getRegistryHost() {
+        return registryHost;
+    }
+
+    public void setRegistryHost(String registryHost) {
+        this.registryHost = registryHost;
     }
     
 }

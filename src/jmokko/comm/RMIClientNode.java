@@ -22,6 +22,7 @@ public class RMIClientNode extends Node {
     
     private final ConcurrentLinkedQueue<TransportMessage> inQueue;
     private final ConcurrentLinkedQueue<TransportMessage> outQueue;
+    private String registryHost = "";
     private final Thread transportThread;
     
     public RMIClientNode(NodeDescriptor nodeDescriptor, InetAddress inetAddress, int port, byte[] initData) {
@@ -39,7 +40,12 @@ public class RMIClientNode extends Node {
                 RmiProxyFactoryBean rmiProxyFactory = new RmiProxyFactoryBean();
                 rmiProxyFactory.setLookupStubOnStartup(false);
                 rmiProxyFactory.setRefreshStubOnConnectFailure(true);
-                String url = "rmi://" + inetAddress.getHostName() + ":" + Integer.toString(port) + "/jmokko.comm.ITransportPipe";
+                String url = "";
+                if(getRegistryHost().isEmpty()) {
+                    url = "rmi://" + inetAddress.getHostName() + ":" + Integer.toString(port) + "/jmokko.comm.ITransportPipe";
+                } else {
+                    url = "rmi://" + getRegistryHost() + ":" + Integer.toString(port) + "/jmokko.comm.ITransportPipe";
+                }
                 log.info("url> " + url);
                 rmiProxyFactory.setServiceUrl(url);
                 rmiProxyFactory.setServiceInterface(jmokko.comm.ITransportPipe.class);
@@ -93,6 +99,14 @@ public class RMIClientNode extends Node {
     
     public void start() {
         transportThread.start();
+    }
+
+    public String getRegistryHost() {
+        return registryHost;
+    }
+
+    public void setRegistryHost(String registryHost) {
+        this.registryHost = registryHost;
     }
     
 }
