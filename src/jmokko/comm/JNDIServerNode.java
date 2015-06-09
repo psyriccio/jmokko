@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.rmi.NoSuchObjectException;
 import java.rmi.RemoteException;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -31,6 +32,7 @@ public class JNDIServerNode extends Node {
     private final ConcurrentLinkedQueue<TransportMessage> inQueue;
     private final SessionManager sessionManager = new SessionManager(10000);
     private final IAuthenticationService authService;
+    private final InetAddress inetAddress;
     private final ITransportPipe pipe = new ITransportPipe() {
 
         @Override
@@ -74,12 +76,17 @@ public class JNDIServerNode extends Node {
         this.queues = new ConcurrentHashMap<>();
         this.inQueue = new ConcurrentLinkedQueue<>();
         this.authService = authService;
+        this.inetAddress = inetAddress;
     }
     
     public void start() throws RemoteException {
         log.info("Starting JNDIServerNode");
         if(jndiServiceExporter == null) {
             jndiServiceExporter = new JndiRmiServiceExporter();
+            Properties env = new Properties();
+            env.put("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
+            env.put("java.naming.provider.url", "iiop://" + inetAddress.getHostName() + ":80");
+            jndiServiceExporter.setJndiEnvironment(env);
             jndiServiceExporter.setJndiName("jmokko.comm.ITransportPipe");
             jndiServiceExporter.setService(pipe);
             jndiServiceExporter.setServiceInterface(ITransportPipe.class);

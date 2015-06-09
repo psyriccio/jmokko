@@ -7,6 +7,7 @@ package jmokko.comm;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.Properties;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import javax.naming.NamingException;
@@ -41,10 +42,14 @@ public class JNDIClientNode extends Node {
                 JndiRmiProxyFactoryBean jndiProxyFactory = new JndiRmiProxyFactoryBean();
                 jndiProxyFactory.setLookupStubOnStartup(false);
                 jndiProxyFactory.setRefreshStubOnConnectFailure(true);
+                Properties env = new Properties();
+                env.put("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
+                env.put("java.naming.provider.url", "iiop://" + inetAddress.getHostName() + ":80");
+                jndiProxyFactory.setJndiEnvironment(env);
                 String url = "jndi://" + inetAddress.getHostName() + ":" + Integer.toString(port) + "/jmokko.comm.ITransportPipe";
                 log.info("url> " + url);
                 //jndiProxyFactory.setServiceUrl(url);
-                jndiProxyFactory.setJndiName(url);
+                jndiProxyFactory.setJndiName("jmokko.comm.ITransportPipe");
                 jndiProxyFactory.setServiceInterface(jmokko.comm.ITransportPipe.class);
                 try {
                     jndiProxyFactory.afterPropertiesSet();
