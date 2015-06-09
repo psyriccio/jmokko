@@ -44,7 +44,7 @@ public class JNDIClientNode extends Node {
                 jndiProxyFactory.setRefreshStubOnConnectFailure(true);
                 Properties env = new Properties();
                 env.put("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
-                env.put("java.naming.provider.url", "iiop://" + inetAddress.getHostName() + ":80");
+                env.put("java.naming.provider.url", "iiop://" + inetAddress.getHostName() + ":" + Integer.toString(port));
                 jndiProxyFactory.setJndiEnvironment(env);
                 String url = "jndi://" + inetAddress.getHostName() + ":" + Integer.toString(port) + "/jmokko.comm.ITransportPipe";
                 log.info("url> " + url);

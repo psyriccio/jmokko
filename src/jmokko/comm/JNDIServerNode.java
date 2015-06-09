@@ -33,6 +33,7 @@ public class JNDIServerNode extends Node {
     private final SessionManager sessionManager = new SessionManager(10000);
     private final IAuthenticationService authService;
     private final InetAddress inetAddress;
+    private final int port;
     private final ITransportPipe pipe = new ITransportPipe() {
 
         @Override
@@ -77,6 +78,7 @@ public class JNDIServerNode extends Node {
         this.inQueue = new ConcurrentLinkedQueue<>();
         this.authService = authService;
         this.inetAddress = inetAddress;
+        this.port = port;
     }
     
     public void start() throws RemoteException {
@@ -85,7 +87,7 @@ public class JNDIServerNode extends Node {
             jndiServiceExporter = new JndiRmiServiceExporter();
             Properties env = new Properties();
             env.put("java.naming.factory.initial", "com.sun.jndi.cosnaming.CNCtxFactory");
-            env.put("java.naming.provider.url", "iiop://" + inetAddress.getHostName() + ":80");
+            env.put("java.naming.provider.url", "iiop://" + inetAddress.getHostName() + ":" + Integer.toString(port));
             jndiServiceExporter.setJndiEnvironment(env);
             jndiServiceExporter.setJndiName("jmokko.comm.ITransportPipe");
             jndiServiceExporter.setService(pipe);
