@@ -97,6 +97,8 @@ public class JNDIServerNode extends Node {
                 //jndiServiceExporter.setServicePort(getPort());
                 //jndiServiceExporter.setRegistryPort(getPort());
                 jndiServiceExporter.afterPropertiesSet();
+                jndiServiceExporter.prepare();
+                jndiServiceExporter.rebind();
             } catch (NamingException ex) {
                 java.util.logging.Logger.getLogger(JNDIServerNode.class.getName()).log(Level.SEVERE, null, ex);
             }
