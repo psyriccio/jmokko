@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -126,9 +127,27 @@ public class JAXB {
             } catch (Exception ex) {
                 ConfigurationBuilder confBuilder = new ConfigurationBuilder();
                 for(String pack : packages) {
-                    confBuilder.addUrls(ClasspathHelper.forPackage(pack));
+                    Set<URL> remURLsPack = new LinkedHashSet<>();
+                    Set<URL> urlsPack = ClasspathHelper.forPackage(pack);
+                    for(URL url : urlsPack) {
+                        System.out.println(url.toString());
+                        if(url.getFile().endsWith(".exe")) {
+                            remURLsPack.add(url);
+                        }
+                    }
+                    urlsPack.removeAll(remURLsPack);
+                    confBuilder.addUrls(urlsPack);
                 }
-                confBuilder.addUrls(ClasspathHelper.forClassLoader());
+                Set<URL> remURLs = new LinkedHashSet<>();
+                Set<URL> urls = ClasspathHelper.forClassLoader();
+                for(URL url : urls) {
+                    System.out.println(url.toString());
+                    if(url.getFile().endsWith(".exe")) {
+                        remURLs.add(url);
+                    }
+                }
+                urls.removeAll(remURLs);
+                confBuilder.addUrls(urls);
                 Reflections reflections = new Reflections(confBuilder);
                 types = reflections.getTypesAnnotatedWith(jmokko.jaxb.Xml.class);
                 try {
