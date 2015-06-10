@@ -90,5 +90,9 @@ public class CustomServerNode extends Node {
     public ConcurrentHashMap<String, ConcurrentLinkedQueue<TransportMessage>> getQueues() {
         return queues;
     }
+
+    public ITransportPipe getPipe() {
+        return pipe;
+    }
     
 }
