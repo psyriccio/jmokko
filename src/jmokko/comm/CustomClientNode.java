@@ -32,14 +32,16 @@ public class CustomClientNode extends Node {
     private final ConcurrentLinkedQueue<TransportMessage> outQueue;
     private final Thread transportThread;
     private final String host;
+    private final String resource;
     private String sessionKey;
     
-    public CustomClientNode(NodeDescriptor nodeDescriptor, String host, int port, byte[] initData) throws UnknownHostException {
+    public CustomClientNode(NodeDescriptor nodeDescriptor, String host, String resource, int port, byte[] initData) throws UnknownHostException {
         super(nodeDescriptor, InetAddress.getByName(host), port);
         
         this.inQueue = new ConcurrentLinkedQueue<>();
         this.outQueue = new ConcurrentLinkedQueue<>();
         this.host = host;
+        this.resource = resource;
         
         log.info("Staring transport thread");
         transportThread = new Thread(new Runnable() {
@@ -54,7 +56,7 @@ public class CustomClientNode extends Node {
                 try {
                     log.info("call to ITransportPipe.init()");
                     //sessionId = client.init(nodeDescriptor.getUid().toString(), initData);
-                    HttpResponse<String> responce = Unirest.post("http://" + host + "/init/" + nodeDescriptor.getUid().toString()).asString();
+                    HttpResponse<String> responce = Unirest.post("http://" + host + "/" + resource + "/init/" + nodeDescriptor.getUid().toString()).asString();
                     sessionId = responce.getBody();
                     log.info("sessionId=" + sessionId);
                     sessionKey = responce.getHeaders().get("Session-Key").get(0);
@@ -70,13 +72,13 @@ public class CustomClientNode extends Node {
                         //    inQueue.add(client.get(sessionId));
                         //}
                         boolean msgAvaible = Boolean.parseBoolean(
-                                Unirest.get("http://" + host + "/message_avaible/" + nodeDescriptor.getUid().toString())
+                                Unirest.get("http://" + host + "/" + resource + "/message_avaible/" + nodeDescriptor.getUid().toString())
                                         .header("Session-Key", sessionKey)
                                         .asString()
                                         .getBody()
                         );
                         if(msgAvaible) {
-                            InputStream inBuf = Unirest.get("http://" + host + "/message_get/" + nodeDescriptor.getUid().toString())
+                            InputStream inBuf = Unirest.get("http://" + host + "/" + resource + "/message_get/" + nodeDescriptor.getUid().toString())
                                 .header("Session-Key", sessionKey)
                                 .asBinary()
                                 .getBody();
@@ -99,7 +101,7 @@ public class CustomClientNode extends Node {
                                 outObj.writeObject(msg);
                                 buf = out.toByteArray();
                             }
-                            Unirest.post("http://" + host + "/message_put/" + nodeDescriptor.getUid().toString())
+                            Unirest.post("http://" + host + "/" + resource + "/message_put/" + nodeDescriptor.getUid().toString())
                                 .header("Session-Key", sessionKey)
                                 .body(buf)
                                 .asString()
