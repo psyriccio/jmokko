@@ -5,21 +5,20 @@
  */
 package jmokko.comm;
 
-import com.jcabi.http.Request;
-import com.jcabi.http.request.ApacheRequest;
-import com.jcabi.http.response.RestResponse;
+import com.mashape.unirest.http.HttpResponse;
+import com.mashape.unirest.http.Unirest;
+import com.mashape.unirest.http.exceptions.UnirestException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.fusesource.hawtbuf.ByteArrayInputStream;
 
 /**
  *
@@ -55,16 +54,9 @@ public class CustomClientNode extends Node {
                 try {
                     log.info("call to ITransportPipe.init()");
                     //sessionId = client.init(nodeDescriptor.getUid().toString(), initData);
-                    RestResponse responce = new ApacheRequest("http://" + host)
-                        .uri()
-                        .path("/init/" + nodeDescriptor.getUid().toString())
-                        .back()
-                        .method(Request.POST)
-                        .fetch()
-                        .as(RestResponse.class)
-                        .assertStatus(HttpURLConnection.HTTP_OK);
-                    sessionId = responce.body();
-                    sessionKey = responce.headers().get("Session-Key").toString();
+                    HttpResponse<String> responce = Unirest.post("http://" + host + "/init/" + nodeDescriptor.getUid().toString()).asString();
+                    sessionId = responce.getBody();
+                    sessionKey = responce.getHeaders().get("Session-Key").get(0);
                     log.info("returned sessionId = " + sessionId);
                 } catch (Exception ex) {
                     log.info("Exception in transport thread");
@@ -77,29 +69,18 @@ public class CustomClientNode extends Node {
                         //    inQueue.add(client.get(sessionId));
                         //}
                         boolean msgAvaible = Boolean.parseBoolean(
-                                new ApacheRequest("http://" + host)
-                                    .uri()
-                                    .path("/message_avaible/" + nodeDescriptor.getUid().toString())
-                                    .back()
-                                    .header("Session-Key", sessionKey)
-                                    .method(Request.GET)
-                                    .fetch()
-                                    .as(RestResponse.class)
-                                    .assertStatus(HttpURLConnection.HTTP_OK)
-                                    .body()
+                                Unirest.get("http://" + host + "/message_avaible/" + nodeDescriptor.getUid().toString())
+                                        .header("Session-Key", sessionKey)
+                                        .asString()
+                                        .getBody()
                         );
                         if(msgAvaible) {
-                            byte[] buf = new ApacheRequest("http://" + host)
-                                .uri()
-                                .path("/message_get/" + nodeDescriptor.getUid().toString())
-                                .back()
+                            InputStream inBuf = Unirest.get("http://" + host + "/message_get/" + nodeDescriptor.getUid().toString())
                                 .header("Session-Key", sessionKey)
-                                .method(Request.GET)
-                                .fetch()
-                                .as(RestResponse.class)
-                                .assertStatus(HttpURLConnection.HTTP_OK)
-                                .binary();
-                            try (ByteArrayInputStream inStr = new ByteArrayInputStream(buf);ObjectInputStream inObj = new ObjectInputStream(inStr)) {
+                                .asBinary()
+                                .getBody();
+
+                            try (ObjectInputStream inObj = new ObjectInputStream(inBuf)) {
                                 try {
                                     inQueue.add((TransportMessage) inObj.readObject());
                                 } catch (ClassNotFoundException ex) {
@@ -117,18 +98,11 @@ public class CustomClientNode extends Node {
                                 outObj.writeObject(msg);
                                 buf = out.toByteArray();
                             }
-                            new ApacheRequest("http://" + host)
-                                .uri()
-                                .path("/message_put/" + nodeDescriptor.getUid().toString())
-                                .back()
+                            Unirest.post("http://" + host + "/message_put/" + nodeDescriptor.getUid().toString())
                                 .header("Session-Key", sessionKey)
-                                .method(Request.POST)
-                                .body().set(buf)
-                                .back()
-                                .fetch()
-                                .as(RestResponse.class)
-                                .assertStatus(HttpURLConnection.HTTP_OK)
-                                .body();
+                                .body(buf)
+                                .asString()
+                                .getBody();
                         }
                         Thread.sleep(300);
                     } catch (InterruptedException ex) {
@@ -137,6 +111,8 @@ public class CustomClientNode extends Node {
                         break;
                     } catch (IOException ex) {
                         log.catching(ex);
+                    } catch (UnirestException ex) {
+                        java.util.logging.Logger.getLogger(CustomClientNode.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
