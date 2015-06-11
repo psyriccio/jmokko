@@ -58,6 +58,7 @@ public class CustomClientNode extends Node {
                     //sessionId = client.init(nodeDescriptor.getUid().toString(), initData);
                     HttpResponse<String> responce = Unirest.post("http://" + host + "/" + resource + "/init/" + nodeDescriptor.getUid().toString())
                         .field("file", initData)
+                        .field("ABCDE", "#####")
                         .asString();
                     sessionId = responce.getBody();
                     log.info("sessionId=" + sessionId);
