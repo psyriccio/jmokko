@@ -56,8 +56,9 @@ public class CustomClientNode extends Node {
                     //sessionId = client.init(nodeDescriptor.getUid().toString(), initData);
                     HttpResponse<String> responce = Unirest.post("http://" + host + "/init/" + nodeDescriptor.getUid().toString()).asString();
                     sessionId = responce.getBody();
+                    log.info("sessionId=" + sessionId);
                     sessionKey = responce.getHeaders().get("Session-Key").get(0);
-                    log.info("returned sessionId = " + sessionId);
+                    log.info("sessionKey=" + sessionKey);
                 } catch (Exception ex) {
                     log.info("Exception in transport thread");
                     log.catching(ex);
