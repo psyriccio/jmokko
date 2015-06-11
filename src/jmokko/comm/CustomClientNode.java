@@ -5,6 +5,7 @@
  */
 package jmokko.comm;
 
+import com.mashape.unirest.http.Headers;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
 import com.mashape.unirest.http.exceptions.UnirestException;
@@ -59,9 +60,10 @@ public class CustomClientNode extends Node {
                     HttpResponse<String> responce = Unirest.post("http://" + host + "/" + resource + "/init/" + nodeDescriptor.getUid().toString())
                         .body(initData)
                         .asString();
+                    Headers headers = responce.getHeaders();
                     sessionId = responce.getBody();
+                    sessionKey = headers.getFirst("Session-Key");
                     log.info("sessionId=" + sessionId);
-                    sessionKey = responce.getHeaders().get("Session-Key").get(0);
                     log.info("sessionKey=" + sessionKey);
                 } catch (Exception ex) {
                     log.info("Exception in transport thread");
