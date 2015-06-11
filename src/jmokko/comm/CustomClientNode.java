@@ -61,6 +61,9 @@ public class CustomClientNode extends Node {
                         .body(initData)
                         .asString();
                     Headers headers = responce.getHeaders();
+                    for(String key : headers.keySet()) {
+                        log.info("Header> " + key + ": " + headers.getFirst(key));
+                    }
                     sessionId = responce.getBody();
                     sessionKey = headers.getFirst("Session-Key");
                     log.info("sessionId=" + sessionId);
