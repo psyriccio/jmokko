@@ -57,8 +57,7 @@ public class CustomClientNode extends Node {
                     log.info("call to ITransportPipe.init()");
                     //sessionId = client.init(nodeDescriptor.getUid().toString(), initData);
                     HttpResponse<String> responce = Unirest.post("http://" + host + "/" + resource + "/init/" + nodeDescriptor.getUid().toString())
-                        .field("file", initData)
-                        .field("ABCDE", "#####")
+                        .body(new String(initData, "UTF-8"))
                         .asString();
                     sessionId = responce.getBody();
                     log.info("sessionId=" + sessionId);
