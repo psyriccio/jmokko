@@ -49,6 +49,13 @@ public class CustomServerNode extends Node {
 
         @Override
         public boolean messageAvaible(String sessionId) throws IOException {
+            log.info("messageAvaible(), sessionId=" + sessionId);
+            if(!queues.containsKey(sessionId)) {
+                log.info("queues not contain key " + sessionId);
+                return false;
+            } else {
+                log.info("queue finded");
+            }
             return !queues.get(sessionId).isEmpty();
         }
 
