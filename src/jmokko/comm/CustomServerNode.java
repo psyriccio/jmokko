@@ -23,6 +23,7 @@ public class CustomServerNode extends Node {
     private static final Logger log = LogManager.getLogger(CustomServerNode.class);
     
     private final ConcurrentHashMap<String, ConcurrentLinkedQueue<TransportMessage>> queues;
+    private final ConcurrentHashMap<String, String> ids;
     private final ConcurrentLinkedQueue<TransportMessage> inQueue;
     private final SessionManager sessionManager = new SessionManager(10000);
     private final IAuthenticationService authService;
@@ -34,24 +35,28 @@ public class CustomServerNode extends Node {
             String sessionId = authService.authentication(id, initData);
             ConcurrentLinkedQueue<TransportMessage> newQueue = new ConcurrentLinkedQueue<>();
             queues.put(sessionId, newQueue);
+            ids.put(id, sessionId);
             log.info("Created session id = " + sessionId);
             return sessionId;
         }
         
         @Override
         public void close(String sessionId) throws IOException {
+            String idInternal = ids.get(sessionId);
             log.info("ITransportPipe.close()");
-            if(queues.contains(sessionId)) {
-                queues.remove(sessionId);
+            if(queues.contains(idInternal)) {
+                queues.remove(idInternal);
+                ids.remove(sessionId);
             }
             log.info("Closed session id = " + sessionId);
         }
 
         @Override
         public boolean messageAvaible(String sessionId) throws IOException {
-            log.info("messageAvaible(), sessionId=" + sessionId);
-            if(!queues.containsKey(sessionId)) {
-                log.info("queues not contain key " + sessionId);
+            String idInternal = ids.get(sessionId);
+            log.info("messageAvaible(), sessionId=" + sessionId + ", idInternal=" + idInternal);
+            if(!queues.containsKey(idInternal)) {
+                log.info("queues not contain key " + sessionId + ", idInternal=" + idInternal);
                 log.info("queues dump:");
                 if(queues.isEmpty()) {
                     log.info("> No queues present!");
@@ -63,16 +68,18 @@ public class CustomServerNode extends Node {
             } else {
                 log.info("queue finded");
             }
-            return !queues.get(sessionId).isEmpty();
+            return !queues.get(idInternal).isEmpty();
         }
 
         @Override
         public TransportMessage get(String sessionId) throws IOException {
-            return queues.get(sessionId).poll();
+            String idInternal = ids.get(sessionId);
+            return queues.get(idInternal).poll();
         }
 
         @Override
         public void put(String sessionId, TransportMessage msg) throws IOException {
+            String idInternal = ids.get(sessionId);
             inQueue.add(msg);
         }
 
@@ -81,6 +88,7 @@ public class CustomServerNode extends Node {
     public CustomServerNode(NodeDescriptor nodeDescriptor, InetAddress inetAddress, int port, IAuthenticationService authService) {
         super(nodeDescriptor, inetAddress, port);
         this.queues = new ConcurrentHashMap<>();
+        this.ids = new ConcurrentHashMap<>();
         this.inQueue = new ConcurrentLinkedQueue<>();
         this.authService = authService;
     }
