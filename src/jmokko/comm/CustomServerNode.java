@@ -53,8 +53,11 @@ public class CustomServerNode extends Node {
             if(!queues.containsKey(sessionId)) {
                 log.info("queues not contain key " + sessionId);
                 log.info("queues dump:");
+                if(queues.isEmpty()) {
+                    log.info("> No queues present!");
+                }
                 for(String key : queues.keySet()) {
-                    log.info(">" + key);
+                    log.info("> " + key);
                 }
                 return false;
             } else {
