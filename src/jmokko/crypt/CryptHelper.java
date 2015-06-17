@@ -10,6 +10,7 @@ import java.io.OutputStream;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
+import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import javax.crypto.BadPaddingException;
@@ -70,7 +71,7 @@ public class CryptHelper {
     }
     
     public byte[] sign(byte[] data, KeyPairContainer key) throws InvalidKeyException, SignatureException {
-        signature.initSign(key.getPrivateKeyObj());
+        signature.initSign((PrivateKey) key.getPrivateKeyPKCS8());
         signature.update(data);
         return signature.sign();
     }
