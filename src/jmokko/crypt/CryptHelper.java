@@ -11,7 +11,6 @@ import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
 import java.security.spec.InvalidKeySpecException;
@@ -21,9 +20,6 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import sun.security.pkcs.PKCS8Key;
-import sun.security.rsa.RSAPrivateCrtKeyImpl;
-import sun.security.rsa.RSAPrivateKeyImpl;
 
 /**
  *
