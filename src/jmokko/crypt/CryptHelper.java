@@ -77,14 +77,14 @@ public class CryptHelper {
         return signature.sign();
     }
 
-    public boolean varifySign(byte[] data, byte[] sign) throws InvalidKeyException, SignatureException {
-        signature.initVerify(keyPair);
+    public boolean varifySign(byte[] data, byte[] sign) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException {
+        signature.initVerify(KeyFactory.getInstance("RSA").generatePublic(keyPair.getPublicKeyX509()));
         signature.update(data);
         return signature.verify(sign);
     }
     
-    public boolean verifySign(byte[] data, byte[] sign, KeyPairContainer key) throws InvalidKeyException, SignatureException {
-        signature.initVerify(key.getPublicKeyObj());
+    public boolean verifySign(byte[] data, byte[] sign, KeyPairContainer key) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException {
+        signature.initVerify(KeyFactory.getInstance("RSA").generatePublic(key.getPublicKeyX509()));
         signature.update(data);
         return signature.verify(sign);
     }
