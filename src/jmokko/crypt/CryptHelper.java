@@ -71,7 +71,7 @@ public class CryptHelper {
     }
     
     public byte[] sign(byte[] data, KeyPairContainer key) throws InvalidKeyException, SignatureException {
-        signature.initSign((PrivateKey) key.getPrivateKeyPKCS8());
+        signature.initSign(key.getPrivateKeyObj());
         signature.update(data);
         return signature.sign();
     }
