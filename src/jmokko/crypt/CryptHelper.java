@@ -8,17 +8,22 @@ package jmokko.crypt;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidKeyException;
+import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.Signature;
 import java.security.SignatureException;
+import java.security.spec.InvalidKeySpecException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
 import javax.crypto.CipherOutputStream;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import sun.security.pkcs.PKCS8Key;
+import sun.security.rsa.RSAPrivateCrtKeyImpl;
+import sun.security.rsa.RSAPrivateKeyImpl;
 
 /**
  *
@@ -64,14 +69,14 @@ public class CryptHelper {
         return cipher.doFinal(data);
     }
     
-    public byte[] sign(byte[] data) throws InvalidKeyException, SignatureException {
-        signature.initSign(keyPair.getPrivateKeyObj());
+    public byte[] sign(byte[] data) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException {
+        signature.initSign(KeyFactory.getInstance("RSA").generatePrivate(keyPair.getPrivateKeyPKCS8()));
         signature.update(data);
         return signature.sign();
     }
     
-    public byte[] sign(byte[] data, KeyPairContainer key) throws InvalidKeyException, SignatureException {
-        signature.initSign(key.getPrivateKeyObj());
+    public byte[] sign(byte[] data, KeyPairContainer key) throws InvalidKeyException, SignatureException, NoSuchAlgorithmException, InvalidKeySpecException {
+        signature.initSign(KeyFactory.getInstance("RSA").generatePrivate(key.getPrivateKeyPKCS8()));
         signature.update(data);
         return signature.sign();
     }
