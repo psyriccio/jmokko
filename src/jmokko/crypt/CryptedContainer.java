@@ -68,7 +68,7 @@ public class CryptedContainer {
     public void pack() throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
         ByteBuffer bb = ByteBuffer.allocate(1024 * 1024 * 100);
         bb.put(CryptedContainer.MAGIC);
-        CryptHelper crypt = new CryptHelper(CryptAlgoritm.RSA, CryptAlgoritmMode.CBC, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, key);
+        CryptHelper crypt = new CryptHelper(CryptAlgoritm.RSA, CryptAlgoritmMode.ECB, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, key);
         byte[] cryptedSymKey = crypt.encrypt(getPackedSymKey(), key);
         bb.put(cryptedSymKey);
         crypt = new CryptHelper(CryptAlgoritm.AES, CryptAlgoritmMode.CBC, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, new KeyPairContainer("AES", symKey.getEncoded()), symKeyIV);
@@ -86,7 +86,7 @@ public class CryptedContainer {
         int dataLength = bb.getInt();
         body = new byte[dataLength];
         bb.get(body);
-        CryptHelper crypt = new CryptHelper(CryptAlgoritm.RSA, CryptAlgoritmMode.CBC, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, key);
+        CryptHelper crypt = new CryptHelper(CryptAlgoritm.RSA, CryptAlgoritmMode.ECB, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, key);
         byte[] decryptedKey = crypt.decrypt(cryptedKey);
         ByteBuffer bbkey = ByteBuffer.wrap(decryptedKey);
         byte[] encodedKey = new byte[32];
