@@ -45,6 +45,9 @@ public class CryptedContainer {
             Cipher cp = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cp.init(Cipher.ENCRYPT_MODE, symKey);
             symKeyIV = cp.getIV();
+            if(symKeyIV == null) {
+                symKeyIV = new byte[16];
+            }
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException ex) {
             String stackTrace = "";
             for(StackTraceElement ste : ex.getStackTrace()) {
