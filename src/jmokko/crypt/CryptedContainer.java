@@ -40,7 +40,7 @@ public class CryptedContainer {
     private void initSymKey() {
         try {
             javax.crypto.KeyGenerator keyGen = javax.crypto.KeyGenerator.getInstance("AES");
-            keyGen.init(256, new SecureRandom());
+            keyGen.init(128, new SecureRandom());
             symKey = new SecretKeySpec(keyGen.generateKey().getEncoded(), "AES");
             Cipher cp = Cipher.getInstance("AES/ECB/PKCS5Padding");
             cp.init(Cipher.ENCRYPT_MODE, symKey);
@@ -65,8 +65,8 @@ public class CryptedContainer {
     
     private void unpackSymKey(byte[] packedKey) {
         ByteBuffer bb = ByteBuffer.wrap(packedKey);
-        byte[] keyEnc = new byte[32];
-        symKeyIV = new byte[32];
+        byte[] keyEnc = new byte[16];
+        symKeyIV = new byte[16];
         bb.get(keyEnc);
         bb.get(symKeyIV);
         symKey = new SecretKeySpec(keyEnc, "AES");
@@ -87,7 +87,7 @@ public class CryptedContainer {
     public void unpack() throws NoSuchAlgorithmException, NoSuchProviderException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
         ByteBuffer bb = ByteBuffer.wrap(body);
         byte[] magic = new byte[5];
-        byte[] cryptedKey = new byte[64];
+        byte[] cryptedKey = new byte[32];
         bb.get(magic);
         bb.get(cryptedKey);
         int dataLength = bb.getInt();
@@ -96,7 +96,7 @@ public class CryptedContainer {
         CryptHelper crypt = new CryptHelper(CryptAlgoritm.RSA, CryptAlgoritmMode.ECB, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, key);
         byte[] decryptedKey = crypt.decrypt(cryptedKey);
         ByteBuffer bbkey = ByteBuffer.wrap(decryptedKey);
-        byte[] encodedKey = new byte[32];
+        byte[] encodedKey = new byte[16];
         bbkey.get(encodedKey);
         bbkey.get(symKeyIV);
         symKey = new SecretKeySpec(encodedKey, "AES");
