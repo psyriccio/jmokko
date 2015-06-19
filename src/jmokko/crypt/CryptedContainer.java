@@ -59,7 +59,7 @@ public class CryptedContainer {
             initSymKey();
         }
         byte[] encodedKey = symKey.getEncoded();
-        return ByteBuffer.allocate(64).put(encodedKey).put(symKeyIV).array();
+        return ByteBuffer.allocate(32).put(encodedKey).put(symKeyIV).array();
         
     }
     
