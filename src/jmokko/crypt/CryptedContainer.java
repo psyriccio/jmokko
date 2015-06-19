@@ -46,7 +46,11 @@ public class CryptedContainer {
             cp.init(Cipher.ENCRYPT_MODE, symKey);
             symKeyIV = cp.getIV();
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException ex) {
-            throw new RuntimeException(ex.getMessage());
+            String stackTrace = "";
+            for(StackTraceElement ste : ex.getStackTrace()) {
+                stackTrace = stackTrace + ste.toString() + "\n";
+            }
+            throw new RuntimeException(ex.getMessage() + "\n" + stackTrace);
         }
     }
     
