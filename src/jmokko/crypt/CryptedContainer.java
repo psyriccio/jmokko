@@ -96,5 +96,21 @@ public class CryptedContainer {
         crypt = new CryptHelper(CryptAlgoritm.AES, CryptAlgoritmMode.CBC, CryptPadding.PKCS1Padding, SignatureAlgoritm.SHA512withRSA, new KeyPairContainer("AES", encodedKey), symKeyIV);
         content = crypt.decrypt(body);
     }
+
+    public byte[] getContent() {
+        return content;
+    }
+
+    public void setContent(byte[] content) {
+        this.content = content;
+    }
+
+    public byte[] getBody() {
+        return body;
+    }
+
+    public void setBody(byte[] body) {
+        this.body = body;
+    }
     
 }
