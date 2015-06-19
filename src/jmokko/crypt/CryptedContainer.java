@@ -46,6 +46,21 @@ public class CryptedContainer {
         }
     }
     
+    private byte[] getPackedSymKey() {
+        byte[] encodedKey = symKey.getEncoded();
+        return ByteBuffer.allocate(64).put(encodedKey).put(symKeyIV).array();
+        
+    }
+    
+    private void unpackSymKey(byte[] packedKey) {
+        ByteBuffer bb = ByteBuffer.wrap(packedKey);
+        byte[] keyEnc = new byte[32];
+        symKeyIV = new byte[32];
+        bb.get(keyEnc);
+        bb.get(symKeyIV);
+        symKey = new SecretKeySpec(keyEnc, "AES");
+    }
+    
     public void pack() {
         ByteBuffer bb = ByteBuffer.allocate(1024 * 1024 * 100);
         bb.put(CryptedContainer.MAGIC);
