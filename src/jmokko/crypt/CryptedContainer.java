@@ -51,6 +51,9 @@ public class CryptedContainer {
     }
     
     private byte[] getPackedSymKey() {
+        if(symKey == null) {
+            initSymKey();
+        }
         byte[] encodedKey = symKey.getEncoded();
         return ByteBuffer.allocate(64).put(encodedKey).put(symKeyIV).array();
         
